@@ -1,3 +1,7 @@
+/*
+@author: darwinZh
+*/
+
 #include <gtk/gtk.h>
 #include <wiringPi.h>
 #include <stdio.h>

@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+'''
+@author: darwinzh
+'''
+
 import spidev
 #import Rpi.GPIO as GPIO
 import time

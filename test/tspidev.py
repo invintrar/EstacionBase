@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+'''
+@author: DarwinZh
+'''
+
 import spidev
 import time
 

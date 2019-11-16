@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+'''
+@author: DarwinZh
+'''
+
 import RPi.GPIO as gpio
 from time import sleep
 
