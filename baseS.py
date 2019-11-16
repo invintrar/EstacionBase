@@ -31,5 +31,3 @@ except KeyboardInterrupt:
 	spi.close()
 #end try
 
-
-
