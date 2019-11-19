@@ -1,49 +1,45 @@
-#!/usr/bin/python3
-
-'''
-@author: DarwinZh
-'''
-
 import spidev
 import time
 
+def ReverseBits(byte):
+	byte = ((byte & 0xF0) >> 4) | ((byte & 0x0F) << 4)
+	byte = ((byte & 0xCC) >> 2) | ((byte & 0x33) << 2)
+	byte = ((byte & 0xAA) >> 1) | ((byte & 0x55) << 1)
+	return byte
+#end def
 
 def ByteToHex(Bytes):
 	return ''.join(["0x%02X " %  x for x in Bytes]).strip()
 #end def
 
-# Create spi object
-spi  = spidev.SpiDev()
+spi  = spidev.SpiDev()					# Create spi object
 # open spi port 0, device (CS) 0
 spi.open(0,0)
-# numero de byte  para transmitir y recibir
 spi.bits_per_word = 8
-# Velocidad maxima para el spi 10 MHz
 spi.max_speed_hz = 10000000
-# Modo de transmision spi para el rf mode 0
 spi.mode = 0
-# variable para la direccion que se va leer en el nrf
-address = 0x00
+'''
+print(spi.bits_per_word)
+print(spi.cshigh)
+print(spi.loop)
+print(spi.lsbfirst)
+print(spi.max_speed_hz)
+print(spi.mode)
+print(spi.threewire)
+'''
+a = 0x00
 
 try:
-	print("Address"," ","Contenido")
-
 	while True:
-		# transfer one byte y uno para recibir
-		resp = spi.xfer2([address, 0x00])
-		# Convertimos el valor recibido a hexadecimal
+		resp = spi.xfer2([a, 0x00])			# transfer one byte
 		resp1 = ByteToHex([resp[1]])
-		#Mostramos lo que recibe y la direccion que enviamos
-		print("%2d" % address, "      ", resp1)
-		# sleep for 0.1 seconds
-		time.sleep(0.1)
-		# leemos el mapa de registro del nrf que tiene hasta la dirc 1x1D
-		if (address > 0x1C):
+		print(a," ", resp1)
+		time.sleep(0.1)					# sleep for 0.1 seconds
+		if (a > 0x1C):
 			spi.close()
 			break
 		#end if
-		# incrementamos  la direccion a leer
-		address += 1
+		a = a + 1
 	# end while
 except KeyboardInterrupt:
 	spi.close()
