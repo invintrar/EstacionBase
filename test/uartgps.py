@@ -9,6 +9,7 @@ try:
 	while True:
 		line = ser.readline()
 		print(line)
+
 except KeyboardInterrupt:
 	ser.close()
 
