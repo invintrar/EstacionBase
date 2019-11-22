@@ -28,11 +28,11 @@ while(cap.isOpen()):
 		out.write(frame)
 
 		cv2.imshow('Frame', frame)
-		if cv2.waitKe(1) & 0xFF == ord('q'):
+		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
 	else:
 		break
 # Liberamos toda las cosas si el trabajo termina
 cap.release()
 out.release()
-cve.destroyAllWindows()
+cv2.destroyAllWindows()
