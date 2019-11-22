@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
 	g_signal_connect (apg, "clicked", G_CALLBACK (off_led), lbl2);
 
 
-	GtkWidget *box = gtk_vbox_new (FALSE, 5);
+	GtkWidget *box = gtk_box_new (FALSE, 5);
 	gtk_box_pack_start(GTK_BOX (box), enc, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (box), lbl, FALSE, FALSE, 1);
 	gtk_box_pack_start(GTK_BOX (box), apg, FALSE, FALSE, 0);
