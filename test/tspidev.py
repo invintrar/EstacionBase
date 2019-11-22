@@ -1,20 +1,16 @@
+#!/usr/bin/python3
 import spidev
 import time
 
-def ReverseBits(byte):
-	byte = ((byte & 0xF0) >> 4) | ((byte & 0x0F) << 4)
-	byte = ((byte & 0xCC) >> 2) | ((byte & 0x33) << 2)
-	byte = ((byte & 0xAA) >> 1) | ((byte & 0x55) << 1)
-	return byte
-#end def
 
 def ByteToHex(Bytes):
 	return ''.join(["0x%02X " %  x for x in Bytes]).strip()
 #end def
 
-spi  = spidev.SpiDev()					# Create spi object
-# open spi port 0, device (CS) 0
-spi.open(0,0)
+# Create spi object
+spi  = spidev.SpiDev()
+# open spi port 0, device (CS) 1
+spi.open(0,1)
 spi.bits_per_word = 8
 spi.max_speed_hz = 10000000
 spi.mode = 0
@@ -31,10 +27,12 @@ a = 0x00
 
 try:
 	while True:
-		resp = spi.xfer2([a, 0x00])			# transfer one byte
+		#transfer one byte an receive one byte
+		resp = spi.xfer2([a, 0x00])
 		resp1 = ByteToHex([resp[1]])
-		print(a," ", resp1)
-		time.sleep(0.1)					# sleep for 0.1 seconds
+		print("%4s %4s" %(hex(a), resp1))
+		# sleep for 0.1 seconds
+		time.sleep(0.1)
 		if (a > 0x1C):
 			spi.close()
 			break
