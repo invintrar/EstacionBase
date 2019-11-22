@@ -19,9 +19,9 @@ frame_height = int(cap.get(4))
 codec = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
 
 # Definimos el codec y el nombre del archivo
-out = cv2.VideoWriter(time.strftime("%d/%m/%Y %H:%M:%S" + ".avi"", codec, 10, (frame_width, frame_height))
+out = cv2.VideoWriter( time.strftime("%d/%m/%Y %H:%M:%S") + '.avi', codec, 10, (frame_width, frame_height))
 
-while(cap.isOpen()):
+while(cap.isOpened()):
 	ret, frame = cap.read()
 	if ret == True:
 		# Escribro las framas
