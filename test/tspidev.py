@@ -10,19 +10,11 @@ def ByteToHex(Bytes):
 # Create spi object
 spi  = spidev.SpiDev()
 # open spi port 0, device (CS) 1
-spi.open(0,1)
+spi.open(0,0)
 spi.bits_per_word = 8
 spi.max_speed_hz = 10000000
 spi.mode = 0
-'''
-print(spi.bits_per_word)
-print(spi.cshigh)
-print(spi.loop)
-print(spi.lsbfirst)
-print(spi.max_speed_hz)
-print(spi.mode)
-print(spi.threewire)
-'''
+
 a = 0x00
 
 try:
