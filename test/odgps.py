@@ -12,7 +12,7 @@ def parseGPS(data):
 		if sdata[2] == 'V':
 			print("No satellite data available")
 			return
-		print("----------Parsing GPGGA----------")
+		print("----------Parsing  GPGGA----------")
 		ti =str((int(sdata[1][0:2]) - 5)) + ":" + sdata[1][2:4] + ":" + sdata[1][4:6]
 		# latitude
 		lat = decode(sdata[3])
@@ -30,7 +30,7 @@ def parseGPS(data):
 		da = sdata[9][0:2] + "/" + sdata[9][2:4] + "/" + sdata[9][4:6]
 
 		print(" Date: %s   time: %s\n Latitude: %s %s\n Longitud: %s %s\n Speed: %s\n True Course: %s" %(da, ti, lat, dirLat, lon, dirLon, speed, trCourse))
-
+		print("----------------------------------\n\n");
 
 def decode(coord):
 	""" Converts DDMM.MMMMM > DD def MM.MMMMM min"""
