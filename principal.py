@@ -19,10 +19,8 @@ gpio.setmode(gpio.BOARD)
 led = 7
 ce = 15
 irq = 16
-espera_ack = 0
 bIntEx = 0
-ve=[0]
-ACK = 0
+dataRec = [0,0,0,0,0,0,0,0,0,0,0]
 
 gpio.setup(led, gpio.OUT, initial = gpio.LOW)
 gpio.setup(ce,gpio.OUT, initial = gpio.LOW)
@@ -58,64 +56,74 @@ def configNrf():
 	sleep(0.15)
 
 def sendData(data):
+	ve = [0x00]
 	gpio.output(ce, gpio.LOW)
 
 	#STATUS
 	spi.xfer2([0x27, 0x70])
 
 	#W_TX_PAYLOAD
-	 ve[0]=0xA0
-	 for x in data:
-	 	ve.append(x)
+	ve[0] = 0xA0
+	for x in data:
+		ve.append(x)
 
-	 spi.xfer2(ve)
+	spi.xfer2(ve)
 
-	 #CONFIG Activo mode transmition
-	 spixfer2(0x20,0x0E)
+	#CONFIG Activo mode transmition
+	spi.xfer2([0x20,0x0E])
 
-	 gpio.output(ce, gpio.HIGH)
-	 sleep(0.015)
-	 gpio.output(ce, gpio.LOW)
+	gpio.output(ce, gpio.HIGH)
+	sleep(0.015)
+	gpio.output(ce, gpio.LOW)
 
-	 while(bIntEx == 0):
-	 	if(espera_ack == 400):
-	 		break
+	while(bIntEx == 0):
+		continue
 
-	 #STATUS
-	 resp = spi.xfer2([0x07,0x00])
+	#STATUS
+	resp = spi.xfer2([0x07,0x00])
 
-	 #TX_FLUSH Limpia el buffer FIFO TX
-	 spi.xfer2([0xE1])
+	#TX_FLUSH Limpia el buffer FIFO TX
+	spi.xfer2([0xE1])
 
-	 #STATUS Clear register
-	 spi.xfer2([0x27, 0x70])
+	#STATUS Clear register
+	spi.xfer2([0x27, 0x70])
 
-	 #CONFIG configuramos modo recepcion
-	 spi.xref2([0x20, 0x0F])
+	#CONFIG configuramos modo recepcion
+	spi.xfer2([0x20, 0x0F])
 
-	 gpio.output(ce, gpio.HIGH)
+	gpio.output(ce, gpio.HIGH)
 
-	 sleep(0.15)
+	sleep(0.15)
+
 
 def recData():
-	ve=[0x00]
+	value = [0]
+
 	#STATUS
-	status = spi.xref2([0x07,0x00])
+	status = spi.xfer2([0x07, 0x00])
 
-	spi.xref2([0x27,0x70])
-	if((status[1] & 0x40) == 1):
+	#STATUS Clear
+	spi.xfer2([0x27, 0x70])
+
+	if((status[1] & 0x40)== 1):
 		#R_RX_PAYLOAD recibe datos del buffer FIFO RX
-		 ve[0]=0x61
-	 	 for x in range(10):
-	 	 	ve.append(0x00)
+		value[0] = 0x61
 
-	 	 spi.xfer2(ve)
+		for x in range(10):
+			value.append(0)
 
-	 	 return ve
+		spi.xfer2(value)
+
+	return value
 
 
 def intEx(channel):
-	recData()
+	global dataRec
+	bIntEx = 1;
+	dataRec = recData()
+
+def ByteToHex(Bytes):
+	return ''.join(["0x%02X " % x for x in Bytes]).strip()
 
 gpio.add_event_detect(irq,gpio.FALLING, callback = intEx, bouncetime = 300)
 
@@ -127,22 +135,25 @@ try:
 		sleep(0.25);
 		gpio.output(led, gpio.LOW)
 		sleep(0.25)
-		resp=spi.xref2([0x07, 0x00])
-
-		data=[0,1,1,2,3,4,5,6,7,8,9]
+		resp=spi.xfer2([0x07, 0x00])
 
 		#config
-		resp1 = spi.xref2([0x00,0x00])
+		resp1 = spi.xfer2([0x00,0x00])
 
 		#EN_RXADDR
-		resp2 = spi.xrfe2([0x02,0x00])
+		resp2 = spi.xfer2([0x02,0x00])
 
 		#RX_PW0
-		resp3 = spi.xref2([0x0A,0x00])
+		resp3 = spi.xfer2([0x0A,0x00])
 
-		print("%0x00:%s 0x02:%s 0x0A:%s" % resp[1], resp1[1], resp2[1], resp3[1])
+		print("0x07:%4s 0x00:%4s 0x02:%4s 0x0A:%4s" % ( ByteToHex([resp[1]]),
+		ByteToHex([resp1[1]]),
+		ByteToHex([resp2[1]]),
+		ByteToHex([resp3[1]])) )
 
-		ACK = sendData(data)
+		data = [0xA,1,2,3,4,5,6,7,8,9]
+
+		sendData(data)
 
 except KeyboardInterrupt:
 	#gpio.output(led,gpio.LOW)
