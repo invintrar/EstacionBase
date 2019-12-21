@@ -29,8 +29,11 @@ gpio.setup(irq, gpio.IN, pull_up_down = gpio.PUD_DOWN)
 def configNrf():
 	gpio.output(ce, gpio.LOW);
 
-	#TX_ADDR
+	#RX_ADDR_P0
 	spi.xfer2([0x2A, 0x78, 0x78, 0x78, 0x78, 0x78])
+
+	#TX_ADDR
+	spi.xfer2([0x30,0x78, 0x78, 0x78, 0x78, 0x78])
 
 	# EN_AA Habilite Auto Ack
 	spi.xfer2([0x21, 0x01])
@@ -46,6 +49,15 @@ def configNrf():
 
 	#RF_CH
 	spi.xfer2([0x25, 0x0C])
+
+	#RF_SETUP
+	spi.xfer2([0x26,0x26])
+
+	#STATUS
+	spi.xfer2([0x27, 0x70])
+
+	#RX_PWP0
+	spi.xfer2([0x31, 0x0A])
 
 	#CONFIG Colocamos en modo recepcion, y definimos CRC de 2 Bytes
 	spi.xfer2([0x20, 0x0F])
