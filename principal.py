@@ -19,8 +19,8 @@ gpio.setmode(gpio.BOARD)
 led = 7
 ce = 15
 irq = 16
-bIntEx = 0
-dataRec = [0,0,0,0,0,0,0,0,0,0,0]
+bIntEx = 3
+dataRec = [0,0,0,0,0,0,0,0]
 
 gpio.setup(led, gpio.OUT, initial = gpio.LOW)
 gpio.setup(ce,gpio.OUT, initial = gpio.LOW)
@@ -45,19 +45,19 @@ def configNrf():
 	spi.xfer2([0x23, 0x03])
 
 	#SETUP_RETR
-	spi.xfer2([0x24, 0x00])
+	spi.xfer2([0x24, 0x1A])
 
 	#RF_CH
 	spi.xfer2([0x25, 0x0C])
 
 	#RF_SETUP
-	spi.xfer2([0x26,0x26])
+	spi.xfer2([0x26,0x0E])
 
 	#STATUS
 	spi.xfer2([0x27, 0x70])
 
 	#RX_PWP0
-	spi.xfer2([0x31, 0x0A])
+	spi.xfer2([0x31, 0x08])
 
 	#CONFIG Colocamos en modo recepcion, y definimos CRC de 2 Bytes
 	spi.xfer2([0x20, 0x0F])
@@ -88,84 +88,110 @@ def sendData(data):
 	sleep(0.015)
 	gpio.output(ce, gpio.LOW)
 
-	while(bIntEx == 0):
-		continue
 
-	#STATUS
-	resp = spi.xfer2([0x07,0x00])
-
-	#TX_FLUSH Limpia el buffer FIFO TX
-	spi.xfer2([0xE1])
-
-	#STATUS Clear register
-	spi.xfer2([0x27, 0x70])
-
-	#CONFIG configuramos modo recepcion
-	spi.xfer2([0x20, 0x0F])
-
-	gpio.output(ce, gpio.HIGH)
-
-	sleep(0.15)
-
-
-def recData():
+def getData():
 	value = [0]
 
-	#STATUS
-	status = spi.xfer2([0x07, 0x00])
+	value[0]=0x61
 
-	#STATUS Clear
-	spi.xfer2([0x27, 0x70])
+	for x in range(8):
+		value.append(0)
 
-	if((status[1] & 0x40)== 1):
-		#R_RX_PAYLOAD recibe datos del buffer FIFO RX
-		value[0] = 0x61
+	spi.xfer2(value)
 
-		for x in range(10):
-			value.append(0)
-
-		spi.xfer2(value)
-
+	value = value[1:]
 	return value
 
 
 def intEx(channel):
 	global dataRec
-	bIntEx = 1;
-	dataRec = recData()
+	global bIntEx
+
+	status=spi.xfer2([0x07,00])
+
+	if((status[1] & 0x20) == 0x20):
+		bIntEx = 1
+
+		print("Send Data")
+		if((status[1] & 0x40)== 0x40):
+			print("Ready Data")
+			dataRec = getData()
+			#TX_FLUS clearn of the buffer FIFO RX
+			spi.xfer2([0xE2])
+			for x in dataRec:
+				print(x)
+
+		#TX_FLUSH clean of the buffer FIFO TX
+		spi.xfer2([0xE1])
+		#STATUS CLEAR REGISTER
+		spi.xfer2([0x27, 0x70])
+		#CONFIG configuration RX mode
+		spi.xfer2([0x20,0x0F])
+		gpio.output(ce, gpio.HIGH)
+		sleep(0.15)
+		return
+	elif((status[1] & 0x40) == 0x40):
+		bIntEX = 2
+		print("Ready Data")
+		dataRec = getData()
+		#TX_FLUS clearn of the buffer FIFO RX
+		spi.xfer2([0xE2])
+		#STATUS CLEAR REGISTER
+		spi.xfer2([0x27,0x70])
+		for x in dataRec:
+			print(x)
+		return
+	elif((status[1] & 0x10)== 0x10 ):
+		bIntEx = 3
+		#TX_FLUSH CLEAR OF THE BUFFER FIFO TX
+		spi.xfer2([0xE1])
+		#STATUS CLEAR REGISTER
+		spi.xfer2([0x27,0x70])
+		print("Maximun Retransmission")
+		return
+
 
 def ByteToHex(Bytes):
 	return ''.join(["0x%02X " % x for x in Bytes]).strip()
 
 gpio.add_event_detect(irq,gpio.FALLING, callback = intEx, bouncetime = 300)
 
+tog = 1;
+
 configNrf()
 
 try:
 	while True:
-		gpio.output(led,gpio.HIGH)
-		sleep(0.25);
-		gpio.output(led, gpio.LOW)
-		sleep(0.25)
-		resp=spi.xfer2([0x07, 0x00])
+		if(tog):
+			gpio.output(led,gpio.HIGH)
+			sleep(0.25);
+			tog = 0;
+		else:
+			gpio.output(led, gpio.LOW)
+			sleep(0.25)
+			tog = 1;
+
+		#resp=spi.xfer2([0x07, 0x00])
 
 		#config
-		resp1 = spi.xfer2([0x00,0x00])
+		#resp1 = spi.xfer2([0x00,0x00])
 
 		#EN_RXADDR
-		resp2 = spi.xfer2([0x02,0x00])
+		#resp2 = spi.xfer2([0x02,0x00])
 
 		#RX_PW0
-		resp3 = spi.xfer2([0x0A,0x00])
+		#resp3 = spi.xfer2([0x0A,0x00])
 
-		print("0x07:%4s 0x00:%4s 0x02:%4s 0x0A:%4s" % ( ByteToHex([resp[1]]),
-		ByteToHex([resp1[1]]),
-		ByteToHex([resp2[1]]),
-		ByteToHex([resp3[1]])) )
+		#print("0x07:%4s 0x00:%4s 0x02:%4s 0x0A:%4s" %
+		#(ByteToHex([resp[1]]),
+		#ByteToHex([resp1[1]]),
+		#ByteToHex([resp2[1]]),
+		#ByteToHex([resp3[1]])))
 
-		data = [0xA,1,2,3,4,5,6,7,8,9]
+		data = [10,30,16,3,24,19,6,7]
 
-		sendData(data)
+		if(bIntEx == 3):
+			sendData(data)
 
 except KeyboardInterrupt:
 	#gpio.output(led,gpio.LOW)
