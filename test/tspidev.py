@@ -17,6 +17,8 @@ spi.mode = 0
 
 a = 0x00
 
+
+
 try:
 	while True:
 		#transfer one byte an receive one byte

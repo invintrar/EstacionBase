@@ -63,9 +63,9 @@ def configNrf():
 	spi.xfer2([0x20, 0x0F])
 
 	#tiempo para salir del modo stanby y entrar en modo recepcion
-	sleep(2)
+	sleep(0.002)
 	gpio.output(ce, gpio.HIGH)
-	sleep(0.15)
+	sleep(0.000015)
 
 def sendData(data):
 	ve = [0x00]
@@ -93,6 +93,9 @@ def setModeRx():
 	gpio.output(ce, gpio.LOW)
 	spi.xfer2([0xE1])
 	spi.xfer2([0x27,0x70])
+	spi.xfer2([0x00,0x00])
+	if((resp[1] & 0x0E)== 0x0E);
+		print("Igual")
 	#CONFIG Active mode Recption
 	spi.xfer2([20,0x0F])
 	gpio.output(ce, gpio.HIGH)
