@@ -13,7 +13,7 @@ def parseGPS(data):
 			print("No satellite data available")
 			return
 		print("----------Parsing  GPGGA----------")
-		ti =str((int(sdata[1][0:2]) - 5)) + ":" + sdata[1][2:4] + ":" + sdata[1][4:6]
+		ti =str((int(sdata[1][0:2]))) + ":" + sdata[1][2:4] + ":" +	sdata[1][4:6]
 		# latitude
 		lat = decode(sdata[3])
 		# latitude direction N/S
@@ -55,4 +55,5 @@ try:
 
 except KeyboardInterrupt:
 	ser.close()
+	print()
 	print("Bye")
