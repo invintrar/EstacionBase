@@ -56,11 +56,16 @@ void on_window_destroy()
 
 void on_led(GtkWidget *wid, gpointer ptr)
 {
-//	char buffer[15];
 	digitalWrite(LED,HIGH);
+	}
+
+void off_led(GtkWidget *wid, gpointer ptr)
+{
+	digitalWrite(LED,LOW);
+}
+void getGps(){
 	char buffer[10];
 
-	
 	data = getDataGps();
 
  	sprintf(buffer, "%d:%d:%d", data.hour, data.minute, data.second);
@@ -77,17 +82,7 @@ void on_led(GtkWidget *wid, gpointer ptr)
 	data.segundosLongitud, 34, data.longitud);
 	gtk_label_set_text(GTK_LABEL(lbLongitud), buffer);
  
-//	delay(1000);
 
-//	sprintf(buffer, "On");
-//	gtk_label_set_text(GTK_LABEL(lbTime), buffer);
 }
 
-void off_led(GtkWidget *wid, gpointer ptr)
-{
-//	char buffer[15];
-	digitalWrite(LED,LOW);
-//	sprintf(buffer, "Off");
-//	gtk_label_set_text(GTK_LABEL(lbTime),buffer);
-}
 //Fin File
